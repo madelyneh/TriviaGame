@@ -3,43 +3,53 @@
 let questions  = [
     {
         question: "How does Harry manage to breathe underwater during the second task of the Triwizard Tournament?",
-        images: "assets/images/harry-underwater.jpg"
+        images: "assets/images/harry-underwater.jpg",
+        correctAnswer: "He eats gillyweed",
     },
     {
         question: "What is the name of Fred and George's joke shop?",
-        images: "assets/images/jokeshop.jpg"
+        images: "assets/images/jokeshop.jpg",
+        correctAnswer: "Weasley's Wizard Wheezes",
     },
     {
         question: "Which of these is NOT one of the Unforgivable Curses?",
-        images: "assets/images/curse.jpg"
+        images: "assets/images/curse.jpg",
+        correctAnswer: "Sectumsempra",
     },
     {
         question: "Who guards the entrance to the Gryffindor common room?",
-        images: "assets/images/fatLady.jpg"
+        images: "assets/images/fatLady.jpg",
+        correctAnswer: "The Fat Lady",
     },
     {
         question: "What does O.W.L. stand for?",
-        images: "assets/images/owlexam.jpg"
+        images: "assets/images/owlexam.jpg",
+        correctAnswer: "Ordinary Wizarding Level",
     },
     {
         question: "A wizard who cannot do magic is known as a:",
-        images: "assets/images/squib.png"
+        images: "assets/images/squib.png",
+        correctAnswer: "Squib",
     },
     {
         question: "What does one say to close the Marauder's Map and make it blank again?",
-        images: "assets/images/map.jpg"
+        images: "assets/images/map.jpg",
+        correctAnswer: "Mischief managed",
     },
     {
         question: "The three kinds of balls used in Quidditch are Bludgers, Snitches, and...",
-        images: "assets/images/harryGame.jpg"
+        images: "assets/images/harryGame.jpg",
+        correctAnswer: "Quaffles",
     },
     {
         question: "Who has been stealing Harry's letters from Ron and Hermione at the beginning of 'Harry Potter and the Chamber of Secrets'?",
-        images: "assets/images/dobby.jpeg"
+        images: "assets/images/dobby.jpeg",
+        correctAnswer: "Dobby",
     },
     {
         question: "How many Weasley siblings are there?",
-        images: "assets/images/weasley.jpg"
+        images: "assets/images/weasley.jpg",
+        correctAnswer: "7",
     }
 
 ];
@@ -65,16 +75,16 @@ let options = [
 
     ["7", "3", "5", "10"],
 
-
 ]
+
+let theRightOnes = ["He eats gillyweed", "Weasley's Wizard Wheezes", "Sectumsempra", "The Fat Lady", "Ordinary Wizarding Level", "Squib", "Mischief managed", "Quaffles", "Dobby", "7"];
 
 
 //Global variables
-let correctAnswers = [];
+let correctAnswers = 0;
+let wrongAnswers = 0;
+let noResponse = 0;
 
-let wrongAnswers = [];
-
-let noResponse = [];
 
 let currentQuestion;
 
@@ -90,30 +100,31 @@ let randomNumber;
 
 let randomAnswers = [];
 
-let intervalId;
+let guess ;
+
+let btnClicked ;
 
 let clockRunning = false;
 
 let newDiv = $("<div>");
 let newDiv2 = $("<div>");
 let newDiv3 = $("<div>");
+let newDiv4 = $("<div>");
+let newImage = $("<img>");
 let span = $("<span>");
 
 
-//Make a button to start out
-//make a  function to loop through the questions object and give the questions
-//make a question timer only 30 sec per question
-//make  a function to set the game. Have a start game button to start the game.
 window.onload = function() {
     $("#startBtn").on("click", setGame);
 
+};
 
 
     //sets the game at the beginning and resets at the end
     function setGame() {
-        correctAnswers = [];
-        wrongAnswers = [];
-        noResponse = [];
+        correctAnswers = 0;
+        wrongAnswers = 0;
+        noResponse = 0;
         currentQuestion ;
         usedQuestions = [];
         answers ;
@@ -147,9 +158,11 @@ window.onload = function() {
 
         $(".question").text(currentQuestion.question);
 
+        
         answers = options[0];
         usedAnswers = options.splice(0,1);
         randomAnswers = answers.shuffle();
+        console.log(answers);
  
 //pushes the random answers to the screen
         randomAnswers.forEach(function(element) {
@@ -158,9 +171,25 @@ window.onload = function() {
             button.attr("text", element);
             button.text(element);
             $(".answers").append(button);
-        
+            
         });
-           
+        $(".choices").on("click", function() {
+        btnClicked = $(this).attr("text");
+            if (theRightOnes.includes(btnClicked) == 1) {
+                response.correct();
+            }
+            else {
+                response.wrong();
+            }
+            
+        });
+    ;
+    };
+
+    //clears the old question and puts in the next time.
+    //also pushes the answers into the correct array based on if it was right or not
+    function nextQuestion() {
+
     };
     
 //function that shuffles my answers array
@@ -178,7 +207,50 @@ window.onload = function() {
         return input;
     };
 
-};    
+  //function that hides the questions, answers, and timer. that also displays the correct guess or not
+  let response = {
+
+    answerResponse: function() {
+        
+
+    },
+
+    correct: function() {
+        $("#gameArea").empty();
+        timer.stop();
+        
+        $("#gameArea").append(newDiv4);
+        newDiv4.addClass("answerResponse");
+        $(".answerResponse").text("Correct!");
+
+        $("#gameArea").append(newImage);
+        newImage.addClass("answerImage");
+        newImage.attr("src", image);
+
+        correctAnswers ++;
+        
+    },
+//HERE Figure out how to get the right answer to show.
+    wrong: function() {
+        $("#gameArea").empty();
+        timer.stop();
+
+        $("#gameArea").append(newDiv4);
+        newDiv4.addClass("answerResponse");
+        $(".answerResponse").text("Wrong. The correct answer was: " + currentQuestion.correctAnswer + ".");
+
+        $("#gameArea").append(newImage);
+        newImage.addClass("answerImage");
+        newImage.attr("src", image);
+
+        wrongAnswers ++;
+    },
+
+    timeOut: function() {
+
+    },
+
+  };
 
     let timer = {
 
@@ -187,25 +259,32 @@ window.onload = function() {
         //make function that will start the timer and if another button is clicked will respond
         start: function() {
             if (!clockRunning) {
+                $(".timer").show();
                 intervalId = setInterval(timer.count, 1000);
                 clockRunning = true;
-                console.log(intervalId);
-                
             }
         },
 
         stop: function() {
+            
+            clearInterval(intervalId);
+            clockRunning = false;
 
-        },
-
-        reset: function() {
+            time = 30;
+            $(".timer").hide();
+            
 
         },
 
         count: function() {
-            let runningCount = 1++;
-             let runningTime = timer.time - runningCount;
-             $(".counter").text(runningTime);
+            let runningCount = timer.time --;
+            $(".counter").text(runningCount);
+
+            if(runningCount === 0) {
+            timer.stop();
+                
+            };    
+             
         },
 
 
