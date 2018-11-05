@@ -110,7 +110,10 @@ let newDiv = $("<div>");
 let newDiv2 = $("<div>");
 let newDiv3 = $("<div>");
 let newDiv4 = $("<div>");
+let newDiv5 = $("<div>");
+let newDiv6 = $("<div>");
 let newImage = $("<img>");
+let button;
 let span = $("<span>");
 
 
@@ -151,6 +154,11 @@ window.onload = function() {
 
     function setQuestion() {
 
+        $(".choices").remove();
+        $(".choices").removeAttr();
+            
+        $(".choices").text("");
+
         currentQuestion = questions[0];
         image = currentQuestion.images;
         usedQuestions = questions.splice(0,1);
@@ -166,20 +174,26 @@ window.onload = function() {
  
 //pushes the random answers to the screen
         randomAnswers.forEach(function(element) {
-            let button = $("<button>");
+            button = $("<button>");
             button.addClass("choices");
             button.attr("text", element);
             button.text(element);
             $(".answers").append(button);
+            
             
         });
         $(".choices").on("click", function() {
         btnClicked = $(this).attr("text");
             if (theRightOnes.includes(btnClicked) == 1) {
                 response.correct();
+                setTimeout(nextQuestion, 5000);
+
+                
+                console.log(correctAnswers);
             }
-            else {
+            if (!theRightOnes.includes(btnClicked)) {
                 response.wrong();
+                setTimeout(nextQuestion, 5000);
             }
             
         });
@@ -189,7 +203,26 @@ window.onload = function() {
     //clears the old question and puts in the next time.
     //also pushes the answers into the correct array based on if it was right or not
     function nextQuestion() {
+        $("#gameArea").empty();
 
+        
+        answers = [];
+        randomAnswers = [];
+    
+        $("#gameArea").append(newDiv);
+        newDiv.addClass("timer").text("Guessing time remaining: ");
+        $(".timer").append(span);
+        span.addClass("counter");
+
+        $("#gameArea").append(newDiv2);
+        newDiv2.addClass("question");
+
+        $("#gameArea").append(newDiv3);
+        newDiv3.addClass("answers");
+
+
+        setQuestion();
+        timer.start();
     };
     
 //function that shuffles my answers array
@@ -216,13 +249,15 @@ window.onload = function() {
     },
 
     correct: function() {
-        $("#gameArea").empty();
+    
+        $("#gameArea").empty()
         timer.stop();
+        timer.time = 30;
         
         $("#gameArea").append(newDiv4);
         newDiv4.addClass("answerResponse");
         $(".answerResponse").text("Correct!");
-
+        
         $("#gameArea").append(newImage);
         newImage.addClass("answerImage");
         newImage.attr("src", image);
@@ -230,10 +265,10 @@ window.onload = function() {
         correctAnswers ++;
         
     },
-//HERE Figure out how to get the right answer to show.
     wrong: function() {
         $("#gameArea").empty();
         timer.stop();
+        
 
         $("#gameArea").append(newDiv4);
         newDiv4.addClass("answerResponse");
@@ -247,10 +282,24 @@ window.onload = function() {
     },
 
     timeOut: function() {
+        $("#gameArea").empty();
+        timer.stop();
+        
+
+        $("#gameArea").append(newDiv4);
+        newDiv4.addClass("answerResponse");
+        $(".answerResponse").text("Times up! The correct answer was: " + currentQuestion.correctAnswer + ".");
+
+        $("#gameArea").append(newImage);
+        newImage.addClass("answerImage");
+        newImage.attr("src", image);
+
+        noResponse ++;
 
     },
 
   };
+
 
     let timer = {
 
@@ -259,6 +308,13 @@ window.onload = function() {
         //make function that will start the timer and if another button is clicked will respond
         start: function() {
             if (!clockRunning) {
+                $(".timer").show();
+                timer.time = 30;
+                intervalId = setInterval(timer.count, 1000);
+                clockRunning = true;
+            }
+            else {
+                timer.time = 30;
                 $(".timer").show();
                 intervalId = setInterval(timer.count, 1000);
                 clockRunning = true;
@@ -270,7 +326,7 @@ window.onload = function() {
             clearInterval(intervalId);
             clockRunning = false;
 
-            time = 30;
+            timer.time = 30;
             $(".timer").hide();
             
 
@@ -281,15 +337,17 @@ window.onload = function() {
             $(".counter").text(runningCount);
 
             if(runningCount === 0) {
-            timer.stop();
+                response.timeOut();
+
+                setTimeout(nextQuestion, 5000);
                 
             };    
              
         },
 
-
-        //if not clicked will time out and "loose"
     };
+
+  
 
 
 
