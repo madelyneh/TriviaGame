@@ -85,6 +85,7 @@ let correctAnswers = 0;
 let wrongAnswers = 0;
 let noResponse = 0;
 
+let questionsAsked = 0;
 
 let currentQuestion;
 
@@ -112,15 +113,19 @@ let newDiv3 = $("<div>");
 let newDiv4 = $("<div>");
 let newDiv5 = $("<div>");
 let newDiv6 = $("<div>");
+let newDiv7 = $("<div>");
+let newDiv8 = $("<div>");
+let newDiv9 = $("<div>");
+
 let newImage = $("<img>");
-let button;
+let btn = $("<button>") ;
 let span = $("<span>");
 
 
-window.onload = function() {
-    $("#startBtn").on("click", setGame);
+// window.onload = function() {
+    $(".startBtn").on("click", setGame);
 
-};
+// };
 
 
     //sets the game at the beginning and resets at the end
@@ -128,11 +133,12 @@ window.onload = function() {
         correctAnswers = 0;
         wrongAnswers = 0;
         noResponse = 0;
+        questionsAsked = 0;
         currentQuestion ;
         usedQuestions = [];
         answers ;
 
-        $("#btnContainer").hide();
+        $("#gameArea").empty();
 
         $("#gameArea").append(newDiv);
         newDiv.addClass("timer").text("Guessing time remaining: ");
@@ -154,15 +160,18 @@ window.onload = function() {
 
     function setQuestion() {
 
+      
+
         $(".choices").remove();
         $(".choices").removeAttr();
             
         $(".choices").text("");
 
+
         currentQuestion = questions[0];
         image = currentQuestion.images;
-        usedQuestions = questions.splice(0,1);
-        console.log(currentQuestion);
+        usedQuestions = questions.splice(0, 1);
+    
 
         $(".question").text(currentQuestion.question);
 
@@ -179,32 +188,48 @@ window.onload = function() {
             button.attr("text", element);
             button.text(element);
             $(".answers").append(button);
-            
-            
         });
+
+
         $(".choices").on("click", function() {
         btnClicked = $(this).attr("text");
+
+            questionsAsked ++;
+        
             if (theRightOnes.includes(btnClicked) == 1) {
                 response.correct();
-                setTimeout(nextQuestion, 5000);
-
+               
+                if (questionsAsked === 10) {
+                    setTimeout(response.gameOver, 5000);
+                    
+                } else {
                 
-                console.log(correctAnswers);
-            }
+                
+                setTimeout(nextQuestion, 5000);
+                };
+            };
+
             if (!theRightOnes.includes(btnClicked)) {
                 response.wrong();
+
+                if (questionsAsked === 10) {
+                    setTimeout(response.gameOver, 5000);
+                    
+                } else {
+                
+                
                 setTimeout(nextQuestion, 5000);
-            }
+                };
+            };
             
         });
-    ;
+    
     };
 
     //clears the old question and puts in the next time.
     //also pushes the answers into the correct array based on if it was right or not
     function nextQuestion() {
         $("#gameArea").empty();
-
         
         answers = [];
         randomAnswers = [];
@@ -220,9 +245,11 @@ window.onload = function() {
         $("#gameArea").append(newDiv3);
         newDiv3.addClass("answers");
 
+        
 
         setQuestion();
         timer.start();
+    
     };
     
 //function that shuffles my answers array
@@ -243,11 +270,6 @@ window.onload = function() {
   //function that hides the questions, answers, and timer. that also displays the correct guess or not
   let response = {
 
-    answerResponse: function() {
-        
-
-    },
-
     correct: function() {
     
         $("#gameArea").empty()
@@ -263,6 +285,7 @@ window.onload = function() {
         newImage.attr("src", image);
 
         correctAnswers ++;
+       
         
     },
     wrong: function() {
@@ -295,30 +318,49 @@ window.onload = function() {
         newImage.attr("src", image);
 
         noResponse ++;
+        questionsAsked ++;
 
     },
+
+    gameOver: function() {
+        $("#gameArea").empty();
+        timer.stop();
+
+        newDiv7.addClass("end");
+        newDiv7.append("Correct guesses: " + correctAnswers);
+        $("#gameArea").append(newDiv7);
+
+        newDiv8.addClass("end2");
+        newDiv8.append("Wrong guesses: " + wrongAnswers);
+        $("#gameArea").append(newDiv8);
+
+        newDiv9.addClass("end3");
+        newDiv9.append("No responses: " + noResponse);
+        $("#gameArea").append(newDiv9);
+
+
+        btn.addClass("restartBtn");
+        btn.text("Wanna try again?");
+        $("#gameArea").append(btn);
+
+        $(".restartBtn").on("click", setGame);
+
+
+    }
 
   };
 
 
     let timer = {
 
-        time: 30,
+        time: 15,
 
         //make function that will start the timer and if another button is clicked will respond
         start: function() {
-            if (!clockRunning) {
-                $(".timer").show();
-                timer.time = 30;
-                intervalId = setInterval(timer.count, 1000);
-                clockRunning = true;
-            }
-            else {
-                timer.time = 30;
-                $(".timer").show();
-                intervalId = setInterval(timer.count, 1000);
-                clockRunning = true;
-            }
+            $(".timer").show();
+            timer.time = 15;
+            intervalId = setInterval(timer.count, 1000);
+            clockRunning = true;
         },
 
         stop: function() {
@@ -326,14 +368,14 @@ window.onload = function() {
             clearInterval(intervalId);
             clockRunning = false;
 
-            timer.time = 30;
+            timer.time = 15;
             $(".timer").hide();
             
 
         },
 
         count: function() {
-            let runningCount = timer.time --;
+            let runningCount = timer.time--;
             $(".counter").text(runningCount);
 
             if(runningCount === 0) {
